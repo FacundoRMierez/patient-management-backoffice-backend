@@ -5,17 +5,17 @@ import { isDevelopment } from '../config';
  * Global error handler middleware
  */
 export const errorHandler = (
-  error: Error,
-  req: Request,
+  err: Error,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
-  console.error('Error:', error);
+  console.error('Error:', err);
 
   const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
 
   res.status(statusCode).json({
-    error: error.message || 'Internal server error',
-    ...(isDevelopment && { stack: error.stack }),
+    error: err.message || 'Internal server error',
+    ...(isDevelopment && { stack: err.stack }),
   });
 };
