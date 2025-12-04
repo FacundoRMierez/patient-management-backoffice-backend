@@ -1,0 +1,16 @@
+
+1) npm init -y
+
+2) npm install express cors dotenv bcryptjs jsonwebtoken zod; npm install -D typescript @types/node @types/express @types/cors @types/bcryptjs @types/jsonwebtoken ts-node-dev prisma
+
+3) npm install @prisma/client
+   npm install @prisma/adapter-pg pg
+	npm install --save-dev @types/pg
+
+4)npm install --save-dev @types/jsonwebtoken@9.0.7
+
+5)npm run prisma:generate
+6)npm run prisma:migrate
+
+
+7)npm install swagger-jsdoc swagger-ui-express; npm install --save-dev @types/swagger-jsdoc @types/swagger-ui-express

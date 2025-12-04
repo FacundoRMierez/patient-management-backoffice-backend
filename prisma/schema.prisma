@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// ENUMS
+// ============================================
+enum ProfessionalType {
+  PSYCHOLOGIST      // Psicólogo
+  DOCTOR            // Médico
+  PSYCHIATRIST      // Psiquiatra
+  PSYCHOPEDAGOGUE   // Psicopedagogo
+  DENTIST           // Odontólogo
+  NUTRITIONIST      // Nutricionista
+  SPEECH_THERAPIST  // Fonoaudiólogo
+  OCCUPATIONAL_THERAPIST // Terapista Ocupacional
+  OTHER             // Otro
+}
+
+// ============================================
+// USER MODEL
+// ============================================
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  
+  // Organization details
+  organizationName String? @map("organization_name")
+  address          String?
+  phoneNumber      String? @map("phone_number")
+  
+  // Professional details (if applicable)
+  professionalType    ProfessionalType?  @map("professional_type")
+  licenseNumber       String?            @map("license_number")
+  specialization      String?
+  
+  // Account status
+  isDeleted        Boolean  @default(false) @map("is_deleted")
+  isApproved       Boolean  @default(false) @map("is_approved")
+  isActive         Boolean  @default(true)  @map("is_active")
+  
+  // Email verification
+  emailVerified    Boolean  @default(false) @map("email_verified")
+  verificationToken String? @unique @map("verification_token")
+  
+  // Password reset
+  resetPasswordToken   String?   @unique @map("reset_password_token")
+  resetPasswordExpires DateTime? @map("reset_password_expires")
+  
+  // Timestamps
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  lastLoginAt      DateTime? @map("last_login_at")
+  
+  // Relations
+  roles       UserRole[]
+  
+  @@map("users")
+  @@index([email])
+  @@index([isDeleted, isApproved])
+}
+
+// ============================================
+// ROLE MODEL
+// ============================================
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique // SUPER_ADMIN, PROFESSIONAL, PATIENT
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  users       UserRole[]
+  permissions RolePermission[]
+  
+  @@map("roles")
+  @@index([name])
+}
+
+// ============================================
+// USER-ROLE (Many-to-Many)
+// ============================================
+model UserRole {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  roleId    String   @map("role_id")
+  assignedAt DateTime @default(now()) @map("assigned_at")
+  assignedBy String?  @map("assigned_by") // User ID who assigned the role
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, roleId])
+  @@map("user_roles")
+  @@index([userId])
+  @@index([roleId])
+}
+
+// ============================================
+// PERMISSION MODEL
+// ============================================
+model Permission {
+  id          String   @id @default(uuid())
+  name        String   @unique // users:create, users:read, users:approve, patients:create, etc.
+  description String?
+  resource    String   // users, patients, appointments, etc.
+  action      String   // create, read, update, delete, approve, etc.
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  roles RolePermission[]
+  
+  @@map("permissions")
+  @@index([resource, action])
+}
+
+// ============================================
+// ROLE-PERMISSION (Many-to-Many)
+// ============================================
+model RolePermission {
+  id           String   @id @default(uuid())
+  roleId       String   @map("role_id")
+  permissionId String   @map("permission_id")
+  grantedAt    DateTime @default(now()) @map("granted_at")
+  
+  // Relations
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+  @@index([roleId])
+  @@index([permissionId])
+}

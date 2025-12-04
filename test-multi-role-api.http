@@ -1,0 +1,147 @@
+# ========================================
+# MULTI-ROLE AUTHENTICATION SYSTEM TESTS
+# ========================================
+# Use this file with REST Client extension or Postman
+
+@baseUrl = http://localhost:3000/api
+@token = 
+
+### 1. Register a new Professional user with default role
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+  "email": "maria.psychologist@example.com",
+  "password": "SecurePass123!",
+  "firstName": "Maria",
+  "lastName": "Rodriguez",
+  "organizationName": "Rodriguez Psychology Clinic",
+  "address": "123 Main St, Miami, FL",
+  "phoneNumber": "+1-555-0101",
+  "professionalType": "PSYCHOLOGIST",
+  "licenseNumber": "PSY-12345",
+  "specialization": "Clinical Psychology"
+}
+
+### 2. Register a new Super Admin user (will need manual role assignment or seed data)
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "AdminPass123!",
+  "firstName": "Admin",
+  "lastName": "User",
+  "roles": ["SUPER_ADMIN"]
+}
+
+### 3. Register a user with multiple roles
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+  "email": "carlos.multi@example.com",
+  "password": "MultiRole123!",
+  "firstName": "Carlos",
+  "lastName": "Martinez",
+  "organizationName": "Martinez Health Center",
+  "professionalType": "PHYSICIAN",
+  "roles": ["PROFESSIONAL", "SUPER_ADMIN"]
+}
+
+### 4. Login as Professional user
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "email": "maria.psychologist@example.com",
+  "password": "SecurePass123!"
+}
+
+### 5. Login as Super Admin
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "AdminPass123!"
+}
+
+### 6. Get current user info (requires authentication)
+# First, copy the token from login response and set @token variable above
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{token}}
+
+### 7. Get all users (Super Admin only)
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}
+
+### 8. Get pending approval users (Super Admin only)
+GET {{baseUrl}}/users/pending-approval
+Authorization: Bearer {{token}}
+
+### 9. Approve a user (Super Admin only)
+# Replace {userId} with actual user ID from registration response
+PATCH {{baseUrl}}/users/{userId}/approve
+Authorization: Bearer {{token}}
+
+### 10. Get user by ID
+# Replace {userId} with actual user ID
+GET {{baseUrl}}/users/{userId}
+Authorization: Bearer {{token}}
+
+### 11. Update user profile
+# Replace {userId} with actual user ID
+PUT {{baseUrl}}/users/{userId}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Maria Updated",
+  "specialization": "Child Psychology"
+}
+
+### 12. Change password
+# Replace {userId} with actual user ID
+PATCH {{baseUrl}}/users/{userId}/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "currentPassword": "SecurePass123!",
+  "newPassword": "NewSecurePass456!"
+}
+
+### 13. Delete user (soft delete)
+# Replace {userId} with actual user ID
+DELETE {{baseUrl}}/users/{userId}
+Authorization: Bearer {{token}}
+
+# ========================================
+# EXPECTED BEHAVIOR WITH MULTI-ROLE SYSTEM
+# ========================================
+# 
+# 1. Registration Response includes 'roles' array
+# 2. Login Response includes 'roles' array in user object
+# 3. JWT Token contains 'roles' in payload
+# 4. Users can have multiple roles simultaneously
+# 5. Authorization checks if user has ANY of required roles
+# 6. Super Admin can access all endpoints
+# 7. Professional can only access their own data
+# 8. Unapproved users cannot login
+# 9. Deleted/Inactive users cannot login
+# 10. All user responses include roles array
+
+# ========================================
+# TESTING CHECKLIST
+# ========================================
+# [ ] Register user with default role (PROFESSIONAL)
+# [ ] Register user with SUPER_ADMIN role
+# [ ] Register user with multiple roles
+# [ ] Login returns user with roles array
+# [ ] Token includes roles in JWT payload
+# [ ] Super Admin can access protected endpoints
+# [ ] Professional cannot access admin-only endpoints
+# [ ] Get user by ID returns roles array
+# [ ] Update user maintains roles
+# [ ] Approve user works for Super Admin only
