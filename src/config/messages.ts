@@ -48,6 +48,30 @@ export const messages = {
 
   // User Management Messages
   user: {
+    registered: {
+      es: 'Usuario registrado exitosamente.',
+      en: 'User registered successfully.',
+    },
+    loginSuccessful: {
+      es: 'Inicio de sesión exitoso.',
+      en: 'Login successful.',
+    },
+    retrieved: {
+      es: 'Usuario obtenido exitosamente.',
+      en: 'User retrieved successfully.',
+    },
+    allRetrieved: {
+      es: 'Usuarios obtenidos exitosamente.',
+      en: 'Users retrieved successfully.',
+    },
+    pendingRetrieved: {
+      es: 'Usuarios pendientes obtenidos exitosamente.',
+      en: 'Pending approval users retrieved successfully.',
+    },
+    profileRetrieved: {
+      es: 'Perfil obtenido exitosamente.',
+      en: 'Profile retrieved successfully.',
+    },
     created: {
       es: 'Usuario creado exitosamente.',
       en: 'User created successfully.',
@@ -167,6 +191,7 @@ export function getMessageBoth(messageKey: string): MessageKey {
  */
 export function createErrorResponse(messageKey: string) {
   return {
+    success: false,
     error: getMessageBoth(messageKey),
   };
 }
@@ -178,8 +203,39 @@ export function createErrorResponse(messageKey: string) {
  * @returns Success object with message in both languages
  */
 export function createSuccessResponse(messageKey: string, data?: any) {
-  return {
+  const response: any = {
+    success: true,
     message: getMessageBoth(messageKey),
-    ...(data && { data }),
   };
+  
+  if (data !== undefined) {
+    response.data = data;
+  }
+  
+  return response;
+}
+
+/**
+ * Create paginated success response
+ * @param messageKey - Nested path to the message
+ * @param data - Array of data items
+ * @param meta - Pagination metadata (count, page, etc.)
+ * @returns Success object with pagination info
+ */
+export function createPaginatedResponse(messageKey: string, data: any[], meta?: any) {
+  const response: any = {
+    success: true,
+    message: getMessageBoth(messageKey),
+    data,
+  };
+  
+  if (meta) {
+    response.meta = meta;
+  } else {
+    response.meta = {
+      count: data.length,
+    };
+  }
+  
+  return response;
 }

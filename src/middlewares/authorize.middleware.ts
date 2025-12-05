@@ -11,7 +11,10 @@ export const authorize = (allowedRoles: string[]) => {
   return async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       if (!req.user) {
-        res.status(401).json({ error: getMessageBoth('auth.unauthorized') });
+        res.status(401).json({ 
+          success: false,
+          error: getMessageBoth('auth.unauthorized') 
+        });
         return;
       }
 
@@ -26,12 +29,18 @@ export const authorize = (allowedRoles: string[]) => {
       });
 
       if (!user) {
-        res.status(401).json({ error: getMessageBoth('auth.userNotFound') });
+        res.status(401).json({ 
+          success: false,
+          error: getMessageBoth('auth.userNotFound') 
+        });
         return;
       }
 
       if (user.isDeleted || !user.isActive) {
-        res.status(403).json({ error: getMessageBoth('auth.accountInactive') });
+        res.status(403).json({ 
+          success: false,
+          error: getMessageBoth('auth.accountInactive') 
+        });
         return;
       }
 
@@ -40,6 +49,7 @@ export const authorize = (allowedRoles: string[]) => {
       
       if (!hasRequiredRole) {
         res.status(403).json({ 
+          success: false,
           error: getMessageBoth('auth.forbidden'),
           required: allowedRoles,
         });

@@ -351,8 +351,6 @@ export class UserService {
       where: { id },
       data: { isDeleted: true },
     });
-
-    return { message: getMessageBoth('user.deleted') };
   }
 
   /**
@@ -418,8 +416,6 @@ export class UserService {
       where: { id },
       data: { password: hashedPassword },
     });
-
-    return { message: getMessageBoth('user.passwordChanged') };
   }
 }
 

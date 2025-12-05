@@ -24,7 +24,10 @@ export const authenticate = async (
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({ error: getMessageBoth('auth.unauthorized') });
+      res.status(401).json({ 
+        success: false,
+        error: getMessageBoth('auth.unauthorized') 
+      });
       return;
     }
 
@@ -41,6 +44,9 @@ export const authenticate = async (
 
     next();
   } catch (error) {
-    res.status(401).json({ error: getMessageBoth('auth.tokenInvalid') });
+    res.status(401).json({ 
+      success: false,
+      error: getMessageBoth('auth.tokenInvalid') 
+    });
   }
 };

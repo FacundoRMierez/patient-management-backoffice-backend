@@ -17,6 +17,7 @@ export const errorHandler = (
   // Handle Zod validation errors
   if (error instanceof ZodError) {
     res.status(400).json({
+      success: false,
       error: {
         es: 'Error de validación',
         en: 'Validation error',
@@ -34,6 +35,7 @@ export const errorHandler = (
   if (error.i18n) {
     const statusCode = error.statusCode || 400;
     res.status(statusCode).json({
+      success: false,
       error: error.i18n,
       ...(isDevelopment && { stack: error.stack }),
     });
@@ -43,6 +45,7 @@ export const errorHandler = (
   // Handle Prisma errors
   if (error.code === 'P2002') {
     res.status(409).json({
+      success: false,
       error: {
         es: 'Ya existe un registro con estos datos.',
         en: 'A record with this data already exists.',
@@ -54,6 +57,7 @@ export const errorHandler = (
 
   if (error.code === 'P2025') {
     res.status(404).json({
+      success: false,
       error: getMessageBoth('general.notFound'),
       ...(isDevelopment && { stack: error.stack }),
     });
@@ -63,6 +67,7 @@ export const errorHandler = (
   // Handle generic errors (fallback)
   const statusCode = error.statusCode || res.statusCode !== 200 ? res.statusCode : 500;
   res.status(statusCode).json({
+    success: false,
     error: {
       es: error.message || 'Error interno del servidor',
       en: error.message || 'Internal server error',

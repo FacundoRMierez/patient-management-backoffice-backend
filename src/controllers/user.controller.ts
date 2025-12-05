@@ -7,6 +7,7 @@ import {
   updateUserSchema,
   changePasswordSchema,
 } from '../validators/user.validator';
+import { createSuccessResponse, createPaginatedResponse, getMessageBoth } from '../config/messages';
 
 // ============================================
 // USER CONTROLLER - Request Handlers
@@ -22,10 +23,7 @@ export class UserController {
       const validatedData = await registerUserSchema.parseAsync(req.body);
       const result = await userService.register(validatedData);
 
-      res.status(201).json({
-        message: 'User registered successfully',
-        data: result,
-      });
+      res.status(201).json(createSuccessResponse('user.registered', result));
     } catch (error) {
       next(error);
     }
@@ -40,10 +38,7 @@ export class UserController {
       const validatedData = await loginSchema.parseAsync(req.body);
       const result = await userService.login(validatedData.email, validatedData.password);
 
-      res.status(200).json({
-        message: 'Login successful',
-        data: result,
-      });
+      res.status(200).json(createSuccessResponse('user.loginSuccessful', result));
     } catch (error) {
       next(error);
     }
@@ -58,10 +53,7 @@ export class UserController {
       const includeDeleted = req.query.includeDeleted === 'true';
       const users = await userService.getAllUsers(includeDeleted);
 
-      res.status(200).json({
-        message: 'Users retrieved successfully',
-        data: users,
-      });
+      res.status(200).json(createPaginatedResponse('user.allRetrieved', users));
     } catch (error) {
       next(error);
     }
@@ -75,11 +67,7 @@ export class UserController {
     try {
       const users = await userService.getPendingApprovalUsers();
 
-      res.status(200).json({
-        message: 'Pending approval users retrieved successfully',
-        data: users,
-        count: users.length,
-      });
+      res.status(200).json(createPaginatedResponse('user.pendingRetrieved', users));
     } catch (error) {
       next(error);
     }
@@ -94,10 +82,7 @@ export class UserController {
       const { id } = req.params;
       const user = await userService.getUserById(id);
 
-      res.status(200).json({
-        message: 'User retrieved successfully',
-        data: user,
-      });
+      res.status(200).json(createSuccessResponse('user.retrieved', user));
     } catch (error) {
       next(error);
     }
@@ -110,16 +95,16 @@ export class UserController {
   async getCurrentUser(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       if (!req.user) {
-        res.status(401).json({ error: 'Not authenticated' });
+        res.status(401).json({ 
+          success: false,
+          error: getMessageBoth('auth.unauthorized') 
+        });
         return;
       }
 
       const user = await userService.getUserById(req.user.userId);
 
-      res.status(200).json({
-        message: 'Profile retrieved successfully',
-        data: user,
-      });
+      res.status(200).json(createSuccessResponse('user.profileRetrieved', user));
     } catch (error) {
       next(error);
     }
@@ -135,10 +120,7 @@ export class UserController {
       const validatedData = await updateUserSchema.parseAsync(req.body);
       const user = await userService.updateUser(id, validatedData);
 
-      res.status(200).json({
-        message: 'User updated successfully',
-        data: user,
-      });
+      res.status(200).json(createSuccessResponse('user.updated', user));
     } catch (error) {
       next(error);
     }
@@ -151,9 +133,9 @@ export class UserController {
   async deleteUser(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
-      const result = await userService.deleteUser(id);
+      await userService.deleteUser(id);
 
-      res.status(200).json(result);
+      res.status(200).json(createSuccessResponse('user.deleted'));
     } catch (error) {
       next(error);
     }
@@ -168,10 +150,7 @@ export class UserController {
       const { id } = req.params;
       const user = await userService.approveUser(id);
 
-      res.status(200).json({
-        message: 'User approved successfully',
-        data: user,
-      });
+      res.status(200).json(createSuccessResponse('user.approved', user));
     } catch (error) {
       next(error);
     }
@@ -184,18 +163,21 @@ export class UserController {
   async changePassword(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       if (!req.user) {
-        res.status(401).json({ error: 'Not authenticated' });
+        res.status(401).json({ 
+          success: false,
+          error: getMessageBoth('auth.unauthorized') 
+        });
         return;
       }
 
       const validatedData = await changePasswordSchema.parseAsync(req.body);
-      const result = await userService.changePassword(
+      await userService.changePassword(
         req.user.userId,
         validatedData.currentPassword,
         validatedData.newPassword
       );
 
-      res.status(200).json(result);
+      res.status(200).json(createSuccessResponse('user.passwordChanged'));
     } catch (error) {
       next(error);
     }
