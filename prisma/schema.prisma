@@ -183,9 +183,17 @@ model Patient {
   isActive        Boolean       @default(true) @map("is_active")
   isDeleted       Boolean       @default(false) @map("is_deleted")
   
-  // Timestamps
+  // Audit timestamps - Fechas de acciones cruciales
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
+  approvedAt      DateTime?     @map("approved_at")      // Cuándo se aprobó
+  deactivatedAt   DateTime?     @map("deactivated_at")   // Cuándo se desactivó
+  deletedAt       DateTime?     @map("deleted_at")       // Cuándo se eliminó (soft delete)
+  
+  // Audit users - Quién realizó cada acción
+  createdBy       String?       @map("created_by")       // ID del usuario que creó
+  approvedBy      String?       @map("approved_by")      // ID del usuario que aprobó
+  lastModifiedBy  String?       @map("last_modified_by") // ID del último que modificó
   
   // Relations
   healthInsurance HealthInsurance?

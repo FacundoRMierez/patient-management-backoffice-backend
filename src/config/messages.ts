@@ -188,6 +188,10 @@ export const messages = {
       es: 'Estadísticas obtenidas exitosamente.',
       en: 'Statistics retrieved successfully.',
     },
+    notOwner: {
+      es: 'No tiene permisos para modificar este paciente.',
+      en: 'You do not have permission to modify this patient.',
+    },
   },
 } as const;
 

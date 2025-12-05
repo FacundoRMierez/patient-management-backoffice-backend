@@ -45,6 +45,11 @@ export class PatientService {
           email: data.email,
           professionalId,
           status,
+          createdBy: professionalId, // Auditoría: quién creó
+          ...(status === 'APPROVED' && {
+            approvedAt: new Date(),
+            approvedBy: professionalId,
+          }),
         },
       });
 
@@ -271,6 +276,7 @@ export class PatientService {
           phoneNumber: data.phoneNumber,
           email: data.email,
           status: data.status,
+          lastModifiedBy: professionalId, // Auditoría: quién modificó
         },
       });
 
@@ -399,7 +405,10 @@ export class PatientService {
 
     await prisma.patient.update({
       where: { id: patientId },
-      data: { isDeleted: true },
+      data: { 
+        isDeleted: true,
+        deletedAt: new Date(), // Auditoría: cuándo se eliminó
+      },
     });
   }
 
@@ -423,7 +432,11 @@ export class PatientService {
 
     const updated = await prisma.patient.update({
       where: { id: patientId },
-      data: { isActive: !patient.isActive },
+      data: { 
+        isActive: !patient.isActive,
+        ...(patient.isActive && { deactivatedAt: new Date() }), // Si se desactiva, registrar cuándo
+        ...(!patient.isActive && { deactivatedAt: null }), // Si se reactiva, limpiar fecha
+      },
     });
 
     return updated.isActive;
@@ -455,7 +468,11 @@ export class PatientService {
 
     await prisma.patient.update({
       where: { id: patientId },
-      data: { status: 'APPROVED' },
+      data: { 
+        status: 'APPROVED',
+        approvedAt: new Date(),    // Auditoría: cuándo se aprobó
+        approvedBy: professionalId, // Auditoría: quién aprobó
+      },
     });
 
     return this.getPatientById(patientId, professionalId);
