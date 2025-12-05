@@ -19,7 +19,7 @@ const app: Application = express();
 // CORS configuration
 app.use(
   cors({
-    origin: config.cors.allowedOrigins,
+    origin: config.cors.allowedOrigins.length > 0 ? config.cors.allowedOrigins : true,
     credentials: true,
   })
 );
