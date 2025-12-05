@@ -4,6 +4,7 @@ import { config } from '../config';
 import prisma from '../database/prisma';
 import { RegisterInput, UpdateUserInput } from '../validators/user.validator';
 import { assignRole, getUserRoles } from '../utils/permissions.helper';
+import { getMessageBoth } from '../config/messages';
 
 // ============================================
 // USER SERVICE - Business Logic Layer
@@ -46,7 +47,9 @@ export class UserService {
     });
 
     if (existingUser) {
-      throw new Error('User with this email already exists');
+      const error: any = new Error(getMessageBoth('auth.emailAlreadyExists').es);
+      error.i18n = getMessageBoth('auth.emailAlreadyExists');
+      throw error;
     }
 
     // Hash password
@@ -111,7 +114,9 @@ export class UserService {
     });
 
     if (!user) {
-      throw new Error('Invalid credentials');
+      const error: any = new Error(getMessageBoth('auth.invalidCredentials').es);
+      error.i18n = getMessageBoth('auth.invalidCredentials');
+      throw error;
     }
 
     // Check if user is deleted
@@ -121,19 +126,25 @@ export class UserService {
 
     // Check if user is active
     if (!user.isActive) {
-      throw new Error('Account is inactive');
+      const error: any = new Error(getMessageBoth('auth.accountInactive').es);
+      error.i18n = getMessageBoth('auth.accountInactive');
+      throw error;
     }
 
     // Check if user is approved
     if (!user.isApproved) {
-      throw new Error('Account is pending approval. Please contact an administrator.');
+      const error: any = new Error(getMessageBoth('auth.accountPendingApproval').es);
+      error.i18n = getMessageBoth('auth.accountPendingApproval');
+      throw error;
     }
 
     // Compare password
     const isPasswordValid = await this.comparePassword(password, user.password);
 
     if (!isPasswordValid) {
-      throw new Error('Invalid credentials');
+      const error: any = new Error(getMessageBoth('auth.invalidCredentials').es);
+      error.i18n = getMessageBoth('auth.invalidCredentials');
+      throw error;
     }
 
     // Update last login
@@ -280,7 +291,9 @@ export class UserService {
     });
 
     if (!user) {
-      throw new Error('User not found');
+      const error: any = new Error(getMessageBoth('auth.userNotFound').es);
+      error.i18n = getMessageBoth('auth.userNotFound');
+      throw error;
     }
 
     // Transform roles to simple roles array
@@ -339,7 +352,7 @@ export class UserService {
       data: { isDeleted: true },
     });
 
-    return { message: 'User deleted successfully' };
+    return { message: getMessageBoth('user.deleted') };
   }
 
   /**
@@ -383,14 +396,18 @@ export class UserService {
     });
 
     if (!user) {
-      throw new Error('User not found');
+      const error: any = new Error(getMessageBoth('auth.userNotFound').es);
+      error.i18n = getMessageBoth('auth.userNotFound');
+      throw error;
     }
 
     // Verify current password
     const isPasswordValid = await this.comparePassword(currentPassword, user.password);
 
     if (!isPasswordValid) {
-      throw new Error('Current password is incorrect');
+      const error: any = new Error(getMessageBoth('user.currentPasswordIncorrect').es);
+      error.i18n = getMessageBoth('user.currentPasswordIncorrect');
+      throw error;
     }
 
     // Hash new password
@@ -402,7 +419,7 @@ export class UserService {
       data: { password: hashedPassword },
     });
 
-    return { message: 'Password changed successfully' };
+    return { message: getMessageBoth('user.passwordChanged') };
   }
 }
 

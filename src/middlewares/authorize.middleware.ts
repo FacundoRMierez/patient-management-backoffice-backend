@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import { AuthRequest } from './auth.middleware';
 import prisma from '../database/prisma';
 import { hasAnyRole } from '../utils/permissions.helper';
+import { getMessageBoth } from '../config/messages';
 
 /**
  * Authorization middleware - Check if user has any of the required role(s)
@@ -10,7 +11,7 @@ export const authorize = (allowedRoles: string[]) => {
   return async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       if (!req.user) {
-        res.status(401).json({ error: 'Not authenticated' });
+        res.status(401).json({ error: getMessageBoth('auth.unauthorized') });
         return;
       }
 
@@ -25,12 +26,12 @@ export const authorize = (allowedRoles: string[]) => {
       });
 
       if (!user) {
-        res.status(401).json({ error: 'User not found' });
+        res.status(401).json({ error: getMessageBoth('auth.userNotFound') });
         return;
       }
 
       if (user.isDeleted || !user.isActive) {
-        res.status(403).json({ error: 'Account is not active' });
+        res.status(403).json({ error: getMessageBoth('auth.accountInactive') });
         return;
       }
 
@@ -39,7 +40,7 @@ export const authorize = (allowedRoles: string[]) => {
       
       if (!hasRequiredRole) {
         res.status(403).json({ 
-          error: 'Access denied. Insufficient permissions.',
+          error: getMessageBoth('auth.forbidden'),
           required: allowedRoles,
         });
         return;

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config';
+import { getMessageBoth } from '../config/messages';
 
 // Extend Express Request to include user
 export interface AuthRequest extends Request {
@@ -23,7 +24,7 @@ export const authenticate = async (
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({ error: 'No token provided' });
+      res.status(401).json({ error: getMessageBoth('auth.unauthorized') });
       return;
     }
 
@@ -40,6 +41,6 @@ export const authenticate = async (
 
     next();
   } catch (error) {
-    res.status(401).json({ error: 'Invalid or expired token' });
+    res.status(401).json({ error: getMessageBoth('auth.tokenInvalid') });
   }
 };
