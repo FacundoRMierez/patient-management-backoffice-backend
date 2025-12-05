@@ -54,10 +54,19 @@ app.get('/', (_req: Request, res: Response) => {
   });
 });
 
+// Swagger JSON endpoint
+app.get('/api-docs/swagger.json', (_req: Request, res: Response) => {
+  res.json(swaggerSpec);
+});
+
 // Swagger documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+app.use('/api-docs', swaggerUi.serve);
+app.get('/api-docs', swaggerUi.setup(swaggerSpec, {
   customCss: '.swagger-ui .topbar { display: none }',
   customSiteTitle: 'Patient Management API Docs',
+  swaggerOptions: {
+    url: '/api-docs/swagger.json',
+  },
 }));
 
 // API routes
