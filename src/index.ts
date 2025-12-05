@@ -16,11 +16,11 @@ const app: Application = express();
 // MIDDLEWARES
 // ============================================
 
-// CORS configuration
+// CORS configuration - Allow all origins
 app.use(
   cors({
-    origin: config.cors.allowedOrigins.length > 0 ? config.cors.allowedOrigins : true,
-    credentials: true,
+    origin: '*',
+    credentials: false,
   })
 );
 
