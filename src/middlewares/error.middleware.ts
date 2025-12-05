@@ -8,9 +8,9 @@ import { getMessageBoth } from '../config/messages';
  */
 export const errorHandler = (
   error: any,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   console.error('Error:', error);
 
@@ -22,7 +22,7 @@ export const errorHandler = (
         es: 'Error de validación',
         en: 'Validation error',
       },
-      details: error.errors.map((err) => ({
+      details: error.issues.map((err: any) => ({
         field: err.path.join('.'),
         message: err.message,
       })),

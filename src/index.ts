@@ -48,6 +48,7 @@ app.get('/', (_req: Request, res: Response) => {
     endpoints: {
       health: '/api/health',
       users: '/api/users',
+      patients: '/api/patients',
       docs: '/api-docs',
     },
   });

@@ -24,6 +24,19 @@ enum ProfessionalType {
   OTHER             // Otro
 }
 
+enum TaxCondition {
+  RESPONSABLE_INSCRIPTO     // Responsable Inscripto
+  MONOTRIBUTO               // Monotributo
+  EXENTO                    // Exento
+  CONSUMIDOR_FINAL          // Consumidor Final
+}
+
+enum PatientStatus {
+  PENDING   // Pendiente de aprobación
+  APPROVED  // Aprobado
+  INACTIVE  // Inactivo
+}
+
 // ============================================
 // USER MODEL
 // ============================================
@@ -64,6 +77,7 @@ model User {
   
   // Relations
   roles       UserRole[]
+  patients    Patient[]  // Pacientes que creó este profesional
   
   @@map("users")
   @@index([email])
@@ -145,3 +159,117 @@ model RolePermission {
   @@index([roleId])
   @@index([permissionId])
 }
+
+// ============================================
+// PATIENT MODEL
+// ============================================
+model Patient {
+  id              String        @id @default(uuid())
+  dni             String        @unique
+  cut             String?       @map("cut") // Código Único de Tramitación
+  firstName       String        @map("first_name")
+  lastName        String        @map("last_name")
+  dateOfBirth     DateTime      @map("date_of_birth")
+  address         String
+  phoneNumber     String?       @map("phone_number")
+  email           String?
+  
+  // Ownership - Profesional que creó el paciente
+  professionalId  String        @map("professional_id")
+  professional    User          @relation(fields: [professionalId], references: [id], onDelete: Restrict)
+  
+  // Status management
+  status          PatientStatus @default(PENDING)
+  isActive        Boolean       @default(true) @map("is_active")
+  isDeleted       Boolean       @default(false) @map("is_deleted")
+  
+  // Timestamps
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  
+  // Relations
+  healthInsurance HealthInsurance?
+  guardians       Guardian[]
+  schoolInfo      SchoolInfo?
+  billingInfo     BillingInfo?
+  
+  @@map("patients")
+  @@index([professionalId])
+  @@index([dni])
+  @@index([status, isActive, isDeleted])
+  @@index([createdAt])
+}
+
+// ============================================
+// HEALTH INSURANCE (Obra Social)
+// ============================================
+model HealthInsurance {
+  id              String   @id @default(uuid())
+  patientId       String   @unique @map("patient_id")
+  insuranceName   String   @map("insurance_name")
+  affiliateNumber String?  @map("affiliate_number")
+  
+  // Relations
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  @@map("health_insurance")
+}
+
+// ============================================
+// GUARDIAN (Progenitores/Tutores)
+// ============================================
+model Guardian {
+  id         String  @id @default(uuid())
+  patientId  String  @map("patient_id")
+  type       String  // 'A', 'B' (Progenitor A, Progenitor B)
+  firstName  String  @map("first_name")
+  lastName   String  @map("last_name")
+  dni        String?
+  phoneNumber String? @map("phone_number")
+  email      String?
+  occupation String?
+  isLegalGuardian Boolean @default(false) @map("is_legal_guardian")
+  
+  // Relations
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  @@map("guardians")
+  @@index([patientId])
+}
+
+// ============================================
+// SCHOOL INFO (Datos Escolares)
+// ============================================
+model SchoolInfo {
+  id           String  @id @default(uuid())
+  patientId    String  @unique @map("patient_id")
+  schoolName   String  @map("school_name")
+  schoolAddress String @map("school_address")
+  grade        String  // Curso/Grado
+  observations String? @db.Text
+  
+  // Relations
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  @@map("school_info")
+}
+
+// ============================================
+// BILLING INFO (Datos de Facturación)
+// ============================================
+model BillingInfo {
+  id              String       @id @default(uuid())
+  patientId       String       @unique @map("patient_id")
+  requiresBilling Boolean      @default(false) @map("requires_billing")
+  businessName    String?      @map("business_name") // Razón Social
+  taxId           String?      @map("tax_id") // CUIT/CUIL
+  taxCondition    TaxCondition? @map("tax_condition")
+  fiscalAddress   String?      @map("fiscal_address")
+  billingEmail    String?      @map("billing_email")
+  
+  // Relations
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  @@map("billing_info")
+}
+

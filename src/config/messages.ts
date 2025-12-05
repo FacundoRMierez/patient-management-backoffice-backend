@@ -141,6 +141,54 @@ export const messages = {
       en: 'Server error. Please try again later.',
     },
   },
+
+  // Patient Messages
+  patient: {
+    created: {
+      es: 'Paciente creado exitosamente.',
+      en: 'Patient created successfully.',
+    },
+    updated: {
+      es: 'Paciente actualizado exitosamente.',
+      en: 'Patient updated successfully.',
+    },
+    deleted: {
+      es: 'Paciente eliminado exitosamente.',
+      en: 'Patient deleted successfully.',
+    },
+    retrieved: {
+      es: 'Paciente obtenido exitosamente.',
+      en: 'Patient retrieved successfully.',
+    },
+    allRetrieved: {
+      es: 'Pacientes obtenidos exitosamente.',
+      en: 'Patients retrieved successfully.',
+    },
+    approved: {
+      es: 'Paciente aprobado exitosamente.',
+      en: 'Patient approved successfully.',
+    },
+    alreadyApproved: {
+      es: 'El paciente ya está aprobado.',
+      en: 'Patient is already approved.',
+    },
+    alreadyExists: {
+      es: 'Ya existe un paciente con este DNI.',
+      en: 'A patient with this DNI already exists.',
+    },
+    notFound: {
+      es: 'Paciente no encontrado.',
+      en: 'Patient not found.',
+    },
+    statusToggled: {
+      es: 'Estado del paciente actualizado.',
+      en: 'Patient status updated.',
+    },
+    statsRetrieved: {
+      es: 'Estadísticas obtenidas exitosamente.',
+      en: 'Statistics retrieved successfully.',
+    },
+  },
 } as const;
 
 /**
